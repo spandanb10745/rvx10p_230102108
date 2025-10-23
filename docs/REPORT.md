@@ -147,7 +147,7 @@ All RVX10 custom instructions use the 7-bit opcode `0001011`.
 
 ### Test 2: `x0` Register Integrity
 
-The `x0` register is hardwired to zero. A test instruction (`add x0,x2,x9`) was executed to confirm that its value cannot be overwritten. Waveforms show the write attempt through EX, MEM, WB, but the register file prevents the write.
+The `x0` register is hardwired to zero. A test instruction (`add x0,x2,x9` in 0x78 PC) was executed to confirm that its value cannot be overwritten. Waveforms show the write attempt through EX, MEM, WB, but the register file prevents the write.
 
 ![x0 Write Attempt in EX Stage](https://github.com/user-attachments/assets/cf858e0f-6ad6-4637-ac1d-60e869e5cc36)
 ![x0 Write Attempt in MEM Stage](https://github.com/user-attachments/assets/d9c74e03-c83b-4412-a24e-1868904bd818)
@@ -162,14 +162,14 @@ The `x0` register is hardwired to zero. A test instruction (`add x0,x2,x9`) was 
 Back-to-back ALU operations were tested to verify forwarding.
 
 **Test 1:**
-- `addi x3,x0,12` followed by `addi x7,x3,-9`  
+- `addi x3,x0,12` in 0x04 PC followed by `addi x7,x3,-9`  in 0x08 PC
 - `x3` value not yet in register file, forwarded from `ALUResultM`  
 
 ![Forwarding Test 1 (EX Stage)](https://github.com/user-attachments/assets/6e9ef5b5-ef7b-46c5-a664-205aac77b00d)
 ![Forwarding Test 1 (Waveform)](https://github.com/user-attachments/assets/4ed61edd-3e10-4814-a1be-3ce66a17827c)
 
 **Test 2:**
-- `add x7,x4,x5` followed by `sub x7,x7,x2`  
+- `add x7,x4,x5` in 0x2C PC followed by `sub x7,x7,x2`  in 0x30 PC
 - Forwarded ALU result ensures correct computation
 
 ![Forwarding Test 2 (EX Stage)](https://github.com/user-attachments/assets/f201ee02-8168-43e0-9bd9-dd6fe3409aba)
@@ -179,7 +179,7 @@ Back-to-back ALU operations were tested to verify forwarding.
 
 ### Test 4: Data Hazard (Load-Use Stall)
 
-- `lw x2,96(x0)` followed by `add x9,x2,x5`  
+- `lw x2,96(x0)` in 0x38 address followed by `add x9,x2,x5`  in 0x3C PC
 - Hazard unit detects dependency, asserts `StallF` and `StallD`, flushes EX stage
 
 ![Load-Use Stall Waveform](https://github.com/user-attachments/assets/fc9d41c8-1da7-4a56-9ebf-87b36fa596bf)
@@ -188,7 +188,7 @@ Back-to-back ALU operations were tested to verify forwarding.
 
 ### Test 5: Control Hazard (Branch Flush)
 
-- `beq x4,x0,around` taken branch  
+- `beq x4,x0,around`  in 0x20 PC taken branch  
 - Pipeline flushes the incorrectly fetched instruction(s)
 
 ![Branch Hazard Before Flush](https://github.com/user-attachments/assets/d72d300c-dc99-49c9-bd1a-9cdab0634d8d)
