@@ -179,7 +179,7 @@ Back-to-back ALU operations were tested to verify forwarding.
 
 ### Test 4: Data Hazard (Load-Use Stall)
 
-- `lw x2,96(x0)` in 0x38 address followed by `add x9,x2,x5`  in 0x3C PC
+- `lw x2,96(x0)` in 0x38 PC address followed by `add x9,x2,x5`  in 0x3C PC
 - Hazard unit detects dependency, asserts `StallF` and `StallD`, flushes EX stage
 
 ![Load-Use Stall Waveform](https://github.com/user-attachments/assets/fc9d41c8-1da7-4a56-9ebf-87b36fa596bf)
