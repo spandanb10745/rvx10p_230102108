@@ -65,11 +65,6 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 3. **Compile and run** the simulation using your toolchain:
 
 
-# Compile all source files and the testbench
-iverilog -o sim -s testbench -g2012 tb/testbench.sv src/*.sv
-
-# Run the compiled simulation
-vvp sim
 
 ## 📚 References
 
