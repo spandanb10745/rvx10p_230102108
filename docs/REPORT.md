@@ -288,26 +288,26 @@ The final state of the register file was compared against the single-cycle RVX10
 The same test program was run on both the single-cycle and pipelined cores to compare performance.
 
 * **Single-Cycle (RVX10):**
-    * Total Cycles: 21
-    * Instructions Retired: 21
+    * Total Cycles: 29
+    * Instructions Retired: 29 (incorporated +3 instructions, as sw & beq won't be counted by my function as regwrite of both of this is 0)
     * **CPI = 1.0** (By definition, 1 instruction takes 1 *long* clock cycle)
-![x0 as X](https://github.com/user-attachments/assets/3a967e8c-093e-4f6f-acdb-0c3e7a98e328)
+![CPI_Single_Cycle](https://github.com/user-attachments/assets/680e4599-d6ab-41c8-8e22-fcadae0da18d))
 
 
 * **Pipelined (RVX10-P):**
-    * Total Cycles: 31
-    * Instructions Retired: 21
-    * **Average CPI = 1.476** (Calculated: 31 cycles / 21 instrs)
-    ![x0 as X](https://github.com/user-attachments/assets/3a967e8c-093e-4f6f-acdb-0c3e7a98e328)
+    * Total Cycles: 38
+    * Instructions Retired: 29
+    * **Average CPI = 1.310** (Calculated: 38 cycles / 29 instrs)
+    ![CPI_Single_Cycle_Pipeline](https://github.com/user-attachments/assets/d38dfe05-ecca-4a58-b64b-78c4af50b8ee)
 
 **Analysis:**
-At first glance, the pipelined core took *more* clock cycles (31 vs 21). This is expected. The CPI of the pipelined core is greater than the ideal 1.0 due to:
+At first glance, the pipelined core took *more* clock cycles (38 vs 29). This is expected. The CPI of the pipelined core is greater than the ideal 1.0 due to:
 1.  **Pipeline Fill:** The first 4 cycles are "wasted" filling the pipeline.
 2.  **Hazard Stalls:** The test program contains load-use and branch hazards, which force stalls and flushes. [cite_start]Each stall/flush increases the `cycle_count` but not the `instr_retired` count, thus increasing the CPI.
 
 However, the **total execution time** is drastically reduced. The single-cycle processor's clock period is limited by its longest path (e.g., `lw`). The pipelined processor's clock period is much smaller, limited only by the longest stage (e.g., EX or MEM).
 
-* `Time (Single-Cycle) = 21 cycles * T_long_cycle`
+* `Time (Single-Cycle) = 29 cycles * T_long_cycle`
 * `Time (Pipelined) = 31 cycles * T_short_cycle` (where `T_short_cycle` << `T_long_cycle`)
 
-The pipelined core achieves significantly higher instruction throughput, suc
+The pipelined core achieves significantly higher instruction throughput
