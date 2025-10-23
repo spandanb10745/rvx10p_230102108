@@ -39,43 +39,52 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 ![dsd](https://github.com/user-attachments/assets/0296251d-c06e-440d-a48d-3899437b4aa2)
 
 
-🧪 How to Run
-🖥️ Option 1: Using Vivado
+## 🧪 How to Run
 
-Create a new project in Vivado.
+### 🖥️ Option 1: Using Vivado
 
-Add all SystemVerilog files from the /src directory as Design Sources.
+1. **Create a new project** in **Vivado**.  
+2. **Add all SystemVerilog files** from the `/src` directory as **Design Sources**.  
+3. **Add** `testbench.sv` from the `/tb` directory as a **Simulation Source**.  
+4. **Create a new memory file** (e.g., `risctest.mem`) in Vivado.  
+5. **Copy and paste** the contents of `risctest.mem` (provided in `/tb`) into the new file.  
+6. **Run the Behavioral Simulation**.  
+7. When the processor executes correctly, the console will display:
 
-Add testbench.sv from the /tb directory as a Simulation Source.
 
-Create a new memory file (e.g., risctest.mem) in Vivado.
 
-Copy and paste the contents of risctest.mem (provided in /tb) into this new file.
+---
 
-Run Behavioral Simulation.
+### 💻 Option 2: Using VS Code / Icarus Verilog / Verilator
 
-If the processor is correct, the console will display:
+1. Ensure you have a **SystemVerilog toolchain** installed (e.g., **Icarus Verilog** or **Verilator**).  
+2. Download the following files:
+- All `.sv` files from the `/src` directory  
+- `testbench.sv` from the `/tb` directory  
+- `rvx10_pipeline.hex` from the `/tb` directory (memory file)
+3. **Compile and run** the simulation using your toolchain:
 
-💻 Option 2: Using VS Code / Icarus Verilog / Verilator
 
-Ensure you have a SystemVerilog toolchain (e.g., Icarus Verilog or Verilator).
+# Compile all source files and the testbench
+iverilog -o sim -s testbench -g2012 tb/testbench.sv src/*.sv
 
-Download the following files:
+# Run the compiled simulation
+vvp sim
 
-All .sv files from the /src directory
+## 📚 References
 
-testbench.sv from the /tb directory
+This project’s design and pipeline architecture are based on:
 
-rvx10_pipeline.hex from the /tb directory (memory file)
+> **Digital Design and Computer Architecture (RISC-V Edition)**  
+> *David Harris and Sarah Harris*
 
-Compile and run the simulation:📚 References
+---
 
-This project’s design and pipeline principles are inspired by:
+## 🏫 Acknowledgment
 
-Digital Design and Computer Architecture (RISC-V Edition)
-David Harris and Sarah Harris
+Developed under the guidance of  
+**Dr. Satyajit Das**  
+Assistant Professor
+Department of Computer Science & Engineering 
+**Indian Institute of Technology, Guwahati**
 
-🏫 Acknowledgment
-
-Developed under the guidance of
-Dr. Satyajit Das
