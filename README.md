@@ -1,36 +1,47 @@
-RVX10-P: 5-Stage Pipelined RISC-V Core
+# 🧠 RVX10-P: 5-Stage Pipelined RISC-V Core
 
-RVX10-P: A Five-Stage Pipelined RISC-V Core supporting RV32I + 10 Custom ALU Instructions, developed under the course Digital Logic and Computer Architecture taught by Dr. Satyajit Das, IIT Guwahati.
+**RVX10-P** is a **five-stage pipelined RISC-V processor (RV32I)** enhanced with **10 custom ALU instructions** under the **RVX10 extension**.  
+Developed as part of the course **Digital Logic and Computer Architecture** taught by **Dr. Satyajit Das**, **IIT Guwahati**.
 
-Overview
+---
 
-This project is a 5-stage pipelined RISC-V processor (RV32I) enhanced with 10 custom ALU instructions (the RVX10 extension). It transforms a single-cycle implementation into a high-throughput pipelined core by partitioning the datapath into five stages: IF, ID, EX, MEM, and WB.
+## 🚀 Overview
 
-The processor correctly handles all data and control hazards using dedicated Forwarding and Hazard units.
+RVX10-P transforms a single-cycle implementation into a **high-throughput pipelined core** by partitioning the datapath into five classic stages:
 
-Key Features
+> **IF → ID → EX → MEM → WB**
 
-5-Stage Pipelined Datapath: (IF, ID, EX, MEM, WB)
+The processor handles **data and control hazards** effectively using dedicated **Forwarding** and **Hazard** units, ensuring correct execution and efficient performance.
 
-Full RV32I ISA: Implements the base integer instruction set.
+---
 
-RVX10 Custom Extension: Supports 10 custom ALU ops (ANDN, ORN, XNOR, MIN, MAX, MINU, MAXU, ROL, ROR, ABS).
+## ⚙️ Key Features
 
-Full Hazard Handling:
+### 🧩 Pipeline Architecture
+- **5-Stage Pipelined Datapath:** IF, ID, EX, MEM, WB
+- **Base ISA:** Fully implements the **RV32I** instruction set
+- **Custom Extension (RVX10):** Adds 10 ALU operations:
+ANDN, ORN, XNOR, MIN, MAX, MINU, MAXU, ROL, ROR, ABS
 
-Forwarding Unit: Resolves Read-After-Write (RAW) data hazards from MEM and WB stages.
+### 🔁 Hazard Handling
+- **Forwarding Unit:**  
+Resolves **Read-After-Write (RAW)** data hazards from **MEM** and **WB** stages.
+- **Hazard Unit:**  
+Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP insertion).
 
-Hazard Unit: Manages load-use stalls (1-cycle bubble) and branch flushes (NOP insertion).
+### ⚡ Performance
+- Achieves an **average CPI ≈ 1.310** on the comprehensive test suite.
+- Demonstrates **high throughput and efficiency** compared to the single-cycle version.
 
-Performance: Achieves an average CPI of ~1.310 on the comprehensive test suite, demonstrating high throughput.
+---
 
-Core Block Diagram
+## 🧱 Core Block Diagram
+*(Include your block diagram image here once available)*  
+```markdown
+![RVX10-P Block Diagram](docs/block_diagram.png)
 
-How to Run
-
-This project includes a self-checking testbench that runs a comprehensive test program (risctest.mem). If the processor is correct, the simulation will end by printing "Simulation Succeeded" to the console.
-
-Option 1: In Vivado
+🧪 How to Run
+🖥️ Option 1: Using Vivado
 
 Create a new project in Vivado.
 
@@ -38,35 +49,34 @@ Add all SystemVerilog files from the /src directory as Design Sources.
 
 Add testbench.sv from the /tb directory as a Simulation Source.
 
-In the Vivado project, create a new memory file (e.g., risctest.mem).
+Create a new memory file (e.g., risctest.mem) in Vivado.
 
-Copy the entire contents of the risctest.mem file (provided in /tb) and paste it into the new memory file you just created.
+Copy and paste the contents of risctest.mem (provided in /tb) into this new file.
 
-Run the behavioral simulation.
+Run Behavioral Simulation.
 
-Option 2: In VS Code (or other simulators like Icarus Verilog)
+If the processor is correct, the console will display:
 
-Ensure you have a SystemVerilog toolchain (like Icarus Verilog or Verilator) installed.
+💻 Option 2: Using VS Code / Icarus Verilog / Verilator
 
-Download the necessary files:
+Ensure you have a SystemVerilog toolchain (e.g., Icarus Verilog or Verilator).
 
-All .sv files from the /src directory.
+Download the following files:
 
-testbench.sv from the /tb directory.
+All .sv files from the /src directory
 
-rvx10_pipeline.hex from the /tb directory (this is the memory file formatted for this setup).
+testbench.sv from the /tb directory
 
-Compile and run the simulation using your toolchain. For example, with Icarus Verilog:
+rvx10_pipeline.hex from the /tb directory (memory file)
 
-# Compile all source files and the testbench
-iverilog -o sim -s testbench -g2012 tb/testbench.sv src/*.sv
+Compile and run the simulation:📚 References
 
-# Run the compiled simulation
-vvp sim
+This project’s design and pipeline principles are inspired by:
 
+Digital Design and Computer Architecture (RISC-V Edition)
+David Harris and Sarah Harris
 
-References
+🏫 Acknowledgment
 
-This project's design and pipeline principles are based on the concepts from:
-
-Digital Design and Computer Architecture (RISC-V Edition) by David Harris and Sarah Harris.
+Developed under the guidance of
+Dr. Satyajit Das
