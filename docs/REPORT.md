@@ -2,10 +2,9 @@
 
 This document details the design, implementation, and verification of the RVX10-P, a 5-stage pipelined RISC-V processor.
 
-**Author**: `spandan_bharadwaj//230102108`
 **References**:
 * Digital Design & Computer Architecture (RISC-V Edition) by Harris & Harris
-* Single-Cycle RVX10 Core: `[Link to your single-cycle RVX10 GitHub repository]`
+* Single-Cycle RVX10 Core: `[[Link to your single-cycle RVX10 GitHub repository](https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10)]`
 
 ---
 
