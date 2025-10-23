@@ -79,7 +79,7 @@ This project’s design and pipeline architecture are based on:
 
 Developed under the guidance of  
 **Dr. Satyajit Das**  
-Assistant Professor
+**Assistant Professor**
 Department of Computer Science & Engineering 
 **Indian Institute of Technology, Guwahati**
 
