@@ -37,8 +37,7 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 ## 🧱 Core Block Diagram
 ![dsd](https://github.com/user-attachments/assets/0296251d-c06e-440d-a48d-3899437b4aa2)
-```markdown
-![RVX10-P Block Diagram](docs/block_diagram.png)
+
 
 🧪 How to Run
 🖥️ Option 1: Using Vivado
