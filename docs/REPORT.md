@@ -190,7 +190,7 @@ The `x0` register is hardwired to zero. A test instruction (`add x0,x2,x9`) was 
 
 ### Test 3: Data Hazard (ALU Forwarding)
 
-[cite_start]A sequence of back-to-back ALU operations was tested to verify forwarding[cite: 66].
+A sequence of back-to-back ALU operations was tested to verify forwarding.
 
 **Test 1 Code Snippet:**
 | Label | RISC-V Assembly | Description | Address | Machine_Code |
@@ -268,7 +268,8 @@ To verify pipelining, a waveform was captured showing multiple instructions in d
 Performance counters for `cycle_count` and `instr_retired` were added to the `riscv` module and monitored in the `testbench` as per the optional bonus task.
 
 ![Testbench Counter Logic (Declarations)](https://github.com/user-attachments/assets/1ce02f08-7541-4206-9576-5489033ae604)
-![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/cad94428-ed6f-40e3-b7c6-12981562e9cf)
+![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/2f8540de-ccc5-40f7-ab8c-637543b610e5)
+![riscv](https://github.com/user-attachments/assets/817b3765-3776-425f-9223-8821815b53a7)
 
 ### Identical Results
 
