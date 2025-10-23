@@ -67,62 +67,106 @@ Two dedicated units were implemented: **Forwarding Unit** and **Hazard Unit**.
 
 ---
 
-## 🧪 3. Verification and Waveforms
+## 🧪 Verification and Waveforms
 
-A self-checking test program (`risctest.mem` / `rvx_pipeline.hex`) verifies the core — if correct, simulation prints `Simulation Succeeded`.
+### Test 1: Primary Test Program
+
+The primary test program runs a series of instructions and, if all are correct, finishes by storing the value **25** at memory address **100**. The simulation output confirms this success.
+
+<details>
+<summary><b>Click to expand Test Program Details (RVX10, Encodings, Assembly)</b></summary>
+
+The program exercises both standard RISC-V instructions and the 10 custom RVX10 instructions.
+
+![The RVX10 Instruction Set (10 ops)](https://github.com/user-attachments/assets/8389582a-fc73-4436-9245-5e7963b313ee)
+![Encoding Table (Concrete)](https://github.com/user-attachments/assets/62deca4f-a804-4f6e-9954-b0ef7a0dbb8c)
+
+#### Instruction format (R-type style used by RVX10)
+
+Bit positions (MSB left):
+
+31 25 24 20 19 15 14 12 11 7 6 0
++-----------+------+-----+-------+-----+-------+
+| func7 | rs2 | rs1 | func3 | rd | op |
++-----------+------+-----+-------+-----+-------+
+
+All RVX10 custom instructions use the 7-bit opcode `0001011`.
 
 ---
 
-### ✅ Test 1: Functional Correctness — Instruction Set & Encodings
+*x2=25; x9=18; (Loaded before the commands below)*
 
-![The RVX10 Instruction Set (10 ops)](https://github.com/user-attachments/assets/8389582a-fc73-4436-9245-5e7963b313ee)  
-![Encoding Table (Concrete)](https://github.com/user-attachments/assets/62deca4f-a804-4f6e-9954-b0ef7a0dbb8)
+#### Test Program Table
 
-**Test program memory images:**  
-![risctest.mem (Part 1)](https://github.com/user-attachments/assets/a7710874-5da2-47a9-b648-a8fef01ba181)  
+| Label | RISC-V Assembly | Description | Address | Machine_Code |
+| :--- | :--- | :--- | ---: | ---: |
+| main: | addi x2,x0,5 | x2 = 5 | 0x00 | 0x00500113 |
+| | addi x3,x0,12 | x3 = 12 | 0x04 | 0x00C00193 |
+| | addi x7,x3,-9 | x7 = 12 - 9 = 3 | 0x08 | 0xFF718393 |
+| ... | ... | ... | ... | ... |
+| end: | add x2,x2,x9 | x2 = 7 + 18 = 25 | 0x48 | 0x00910133 |
+| | andn x10,x2,x9 | x10 = 25 & ~18 = 9 | 0x4C | 0x0091050B |
+| ... | ... | ... | ... | ... |
+| (corrected) | sw x2,100(x0) | [100] = 25 | 0x7C | 0x01902823 |
+| done: | beq x2,x2,done | infinite loop | 0x80 | 0x00210063 |
+
+**Test Program (`risctest.mem`)**
+![risctest.mem (Part 1)](https://github.com/user-attachments/assets/a7710874-5da2-47a9-b648-a8fef01ba181)
 ![risctest.mem (Part 2)](https://github.com/user-attachments/assets/3a967e8c-093e-4f6f-acdb-0c3e7a98e328)
 
+</details>
+
 ---
 
-### 🧱 Test 2: `x0` Register Integrity
+### Test 2: `x0` Register Integrity
 
-Write attempts to `x0` are blocked — waveforms showing attempts and protection:
+The `x0` register is hardwired to zero. A test instruction (`add x0,x2,x9`) was executed to confirm that its value cannot be overwritten. Waveforms show the write attempt through EX, MEM, WB, but the register file prevents the write.
 
-![x0 Write Attempt in EX Stage](https://github.com/user-attachments/assets/cf858e0f-6ad6-4637-ac1d-60e869e5cc36)  
-![x0 Write Attempt in MEM Stage](https://github.com/user-attachments/assets/d9c74e03-c83b-4412-a24e-1868904bd818)  
-![x0 Write Attempt in WB Stage](https://github.com/user-attachments/assets/1eb6797c-3c0a-434e-83a8-abf6bfa8bc10)  
-![x0 Register in RegFile (Stays X/0)](https://github.com/user-attachments/assets/25123f46-b990-4170-b32e-1b691d37e3fb)  
+![x0 Write Attempt in EX Stage](https://github.com/user-attachments/assets/cf858e0f-6ad6-4637-ac1d-60e869e5cc36)
+![x0 Write Attempt in MEM Stage](https://github.com/user-attachments/assets/d9c74e03-c83b-4412-a24e-1868904bd818)
+![x0 Write Attempt in WB Stage](https://github.com/user-attachments/assets/1eb6797c-3c0a-434e-83a8-abf6bfa8bc10)
+![x0 Register in RegFile (Stays X/0)](https://github.com/user-attachments/assets/25123f46-b990-4170-b32e-1b691d37e3fb)
 ![Register File Write Logic (Prevents x0 Write)](https://github.com/user-attachments/assets/f8bae6c3-f868-423d-8125-9cacc9ecbd36)
 
 ---
 
-### 🔄 Test 3: Data Hazard (ALU Forwarding)
+### Test 3: Data Hazard (ALU Forwarding)
 
-Forwarding results used to resolve RAW dependencies — waveforms and snapshots:
+Back-to-back ALU operations were tested to verify forwarding.
 
-![Forwarding Test 1 (EX Stage)](https://github.com/user-attachments/assets/6e9ef5b5-ef7b-46c5-a664-205aac77b00d)  
-![Forwarding Test 1 (Waveform)](https://github.com/user-attachments/assets/4ed61edd-3e10-4814-a1be-3ce66a17827c)  
-![Forwarding Test 2 (EX Stage)](https://github.com/user-attachments/assets/f201ee02-8168-43e0-9bd9-dd6fe3409aba)  
+**Test 1:**
+- `addi x3,x0,12` followed by `addi x7,x3,-9`  
+- `x3` value not yet in register file, forwarded from `ALUResultM`  
+
+![Forwarding Test 1 (EX Stage)](https://github.com/user-attachments/assets/6e9ef5b5-ef7b-46c5-a664-205aac77b00d)
+![Forwarding Test 1 (Waveform)](https://github.com/user-attachments/assets/4ed61edd-3e10-4814-a1be-3ce66a17827c)
+
+**Test 2:**
+- `add x7,x4,x5` followed by `sub x7,x7,x2`  
+- Forwarded ALU result ensures correct computation
+
+![Forwarding Test 2 (EX Stage)](https://github.com/user-attachments/assets/f201ee02-8168-43e0-9bd9-dd6fe3409aba)
 ![Forwarding Test 2 (Waveform)](https://github.com/user-attachments/assets/5e478367-e20b-4c8e-ad46-3a0b03e93385)
 
 ---
 
-### 🕒 Test 4: Load-Use Hazard (Stall)
+### Test 4: Data Hazard (Load-Use Stall)
 
-`lw` followed immediately by use triggers one-cycle stall (StallF/StallD + FlushE):
+- `lw x2,96(x0)` followed by `add x9,x2,x5`  
+- Hazard unit detects dependency, asserts `StallF` and `StallD`, flushes EX stage
 
 ![Load-Use Stall Waveform](https://github.com/user-attachments/assets/fc9d41c8-1da7-4a56-9ebf-87b36fa596bf)
 
 ---
 
-### 🔀 Test 5: Control Hazard (Branch Flush)
+### Test 5: Control Hazard (Branch Flush)
 
-Taken branch flushes incorrect IF/ID instructions:
+- `beq x4,x0,around` taken branch  
+- Pipeline flushes the incorrectly fetched instruction(s)
 
-![Branch Hazard (Before Flush)](https://github.com/user-attachments/assets/d72d300c-dc99-49c9-bd1a-9cdab0634d8d)  
-![Branch Hazard (After Flush)](https://github.com/user-attachments/assets/9428145e-c6fd-452a-89ee-ba5d847887f1)
+![Branch Hazard Before Flush](https://github.com/user-attachments/assets/d72d300c-dc99-49c9-bd1a-9cdab0634d8d)
+![Branch Hazard After Flush](https://github.com/user-attachments/assets/9428145e-c6fd-452a-89ee-ba5d847887f1)
 
----
 
 ### 🧵 Test 6: Pipeline Concurrency
 
