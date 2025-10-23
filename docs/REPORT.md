@@ -18,7 +18,7 @@ This document details the design, implementation, and verification of the RVX10-
 
 The design follows the classic 5-stage RISC-V pipeline, as shown in the block diagram below. The core logic from the single-cycle implementation was separated, and dedicated pipeline registers were added to isolate each stage.
 
-![Full Pipelined Datapath](image_733778.png)
+![Full Pipelined Datapath](https://github.com/user-attachments/assets/b30e0af6-e2ff-43d2-aaca-5209e3659a5a)
 *Figure 1: High-Level Block Diagram of the RVX10-P Core*
 
 [cite_start]The most significant additions are the **Forwarding Unit** and the **Hazard Unit**, which are essential for resolving data and control hazards[cite: 7].
