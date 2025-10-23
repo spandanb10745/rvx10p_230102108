@@ -1,14 +1,5 @@
 # RVX10-P: Design and Verification Report
 
-**Author**: spandan_bharadwaj//230102108
-
-**References**:
-* Digital Design & Computer Architecture (RISC-V Edition) by Harris & Harris
-* Single-Cycle RVX10 Core: [https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10](https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10)
-* Reference Textbook Diagram:
-    ![Sample of Sarah Harris ref book Digital design and computer architecture](https://github.com/user-attachments/assets/87863e0f-9cb3-4b95-a4ff-1014210ddfe1)
-
----
 
 ## 1. Design Description
 
@@ -316,3 +307,10 @@ The self-checking test program verified the end-to-end functional correctness. T
 
 ![Simulation Succeeded in Console (Example 1)](https://github.com/user-attachments/assets/33db9c56-eb1d-404a-b9c1-7b04d96c3e48)
 
+**References**:
+* Digital Design & Computer Architecture (RISC-V Edition) by Harris & Harris
+* Single-Cycle RVX10 Core: [https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10](https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10)
+* Reference Textbook Diagram:
+    ![Sample of Sarah Harris ref book Digital design and computer architecture](https://github.com/user-attachments/assets/87863e0f-9cb3-4b95-a4ff-1014210ddfe1)
+
+---
