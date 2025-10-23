@@ -4,7 +4,7 @@ This document details the design, implementation, and verification of the RVX10-
 
 **References**:
 * Digital Design & Computer Architecture (RISC-V Edition) by Harris & Harris
-* Single-Cycle RVX10 Core: `[(https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10)]`
+* Single-Cycle RVX10 Core: `(https://github.com/spandanb10745/CS322M-230102108/tree/main/RVX10)`
 
 ---
 
