@@ -45,7 +45,7 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 1. **Create a new project** in **Vivado**.  
 2. **Add all SystemVerilog files** from the `/src` directory as **Design Sources**.  
-3. **Add** `testbench.sv` from the `/tb` directory as a **Simulation Source**.  
+3. **Add** `tb_pipeline.sv` from the `/tb` directory as a **Simulation Source**.  
 4. **Create a new memory file** (e.g., `risctest.mem`) in Vivado.  
 5. **Copy and paste** the contents of `risctest.mem` (provided in `/tb`) into the new file.  
 6. **Run the Behavioral Simulation**.  
@@ -60,7 +60,7 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 1. Ensure you have a **SystemVerilog toolchain** installed (e.g., **Icarus Verilog** or **Verilator**).  
 2. Download the following files:
 - All `.sv` files from the `/src` directory  
-- `testbench.sv` from the `/tb` directory  
+- `tb_pipeline.sv` from the `/tb` directory  
 - `rvx10_pipeline.hex` from the `/tb` directory (memory file)
 3. **Compile and run** the simulation using your toolchain:
 
