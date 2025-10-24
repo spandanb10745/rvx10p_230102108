@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
 // Create Date: 22.10.2025 21:22:42
 // Design Name: 
@@ -15,6 +15,7 @@
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -23,12 +24,6 @@
  * @brief Datapath Pipeline register between Decode and Execution Stage.
  * @details Latches data signals passing from ID to EX.
  * Has asynchronous reset and synchronous clear (flush).
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param clear   Synchronous clear (flush)
- * @param ...D    Inputs from Decode stage
- * @param ...E    Latched outputs for Execute stage
  */
 module ID_IEx  (
   input  logic       clk, reset, clear,
@@ -37,7 +32,12 @@ module ID_IEx  (
   input  logic [31:0] ImmExtD, PCPlus4D,
   output logic [31:0] RD1E, RD2E, PCE, 
   output logic [4:0] Rs1E, Rs2E, RdE, 
-  output logic [31:0] ImmExtE, PCPlus4E
+  output logic [31:0] ImmExtE, PCPlus4E,
+  
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from decode
+  output logic       valid_out  // Valid bit for execute
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin
@@ -50,6 +50,7 @@ module ID_IEx  (
       RdE      <= 0;
       ImmExtE  <= 0;
       PCPlus4E <= 0;
+      valid_out<= 0; // Clear valid bit
     end
     else if (clear) begin // Synchronous clear (flushes to 0)
       RD1E     <= 0;
@@ -60,6 +61,7 @@ module ID_IEx  (
       RdE      <= 0;
       ImmExtE  <= 0;
       PCPlus4E <= 0;
+      valid_out<= 0; // Clear valid bit
     end
     else begin // Normal operation: latch inputs
       RD1E     <= RD1D;
@@ -70,6 +72,7 @@ module ID_IEx  (
       RdE      <= RdD;
       ImmExtE  <= ImmExtD;
       PCPlus4E <= PCPlus4D;
+      valid_out<= valid_in; // Propagate valid bit
     end
   end
 
