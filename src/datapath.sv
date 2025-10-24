@@ -16,6 +16,7 @@
 // Revision:
 // Revision 0.01 - File Created (single-cycle)
 // Revision 0.02 - Converted to 5-stage pipeline
+// Revision 0.03 - Added valid bit propagation
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -41,7 +42,14 @@ module datapath(
   input  logic [1:0] ForwardAE, ForwardBE,
   output logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E,
   output logic [4:0] RdE, RdM, RdW,
-  input  logic       StallD, StallF, FlushD, FlushE
+  input  logic       StallD, StallF, FlushD, FlushE,
+
+  // --- MODIFICATION: VALID BITS ADDED ---
+  output logic       validD,
+  output logic       validE,
+  output logic       validM,
+  output logic       validW
+  // --------------------------------------
 );
 
   // Internal datapath signals
@@ -96,7 +104,15 @@ module datapath(
     .PCPlus4F (PCPlus4F),
     .InstrD   (InstrD),
     .PCD      (PCD),
-    .PCPlus4D (PCPlus4D)
+    .PCPlus4D (PCPlus4D),
+
+    // --- MODIFICATION: VALID BIT ---
+    // A new instruction is always valid (1'b1).
+    // On stall, 'enable' is false, so 'validD' holds.
+    // On flush, 'clear' is true, so 'validD' becomes 0.
+    .valid_in (1'b1),
+    .valid_out(validD)
+    // -------------------------------
   );
   
   // ------------------
@@ -150,7 +166,14 @@ module datapath(
     .Rs2E     (Rs2E),
     .RdE      (RdE),
     .ImmExtE  (ImmExtE),
-    .PCPlus4E (PCPlus4E)
+    .PCPlus4E (PCPlus4E),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit. 'clear' (FlushE) will set validE to 0.
+    // This register has no 'enable', so it never stalls.
+    .valid_in (validD),
+    .valid_out(validE)
+    // -------------------------------
   );
   
   // -------------------
@@ -181,14 +204,14 @@ module datapath(
     .d1 (ImmExtE),    // From immediate extender
     .s  (ALUSrcE),
     .y  (SrcBE)
-  ); 
+  );  
   
   // Adder for branch/jump target address
   adder pcaddbranch(
     .a (PCE),
     .b (ImmExtE),
     .y (PCTargetE)
-  ); 
+  );  
   
   // The main Arithmetic Logic Unit (ALU)
   alu alu(
@@ -213,7 +236,13 @@ module datapath(
     .ALUResultM (ALUResultM),
     .WriteDataM (WriteDataM),
     .RdM        (RdM),
-    .PCPlus4M   (PCPlus4M)
+    .PCPlus4M   (PCPlus4M),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit.
+    .valid_in (validE),
+    .valid_out(validM)
+    // -------------------------------
   );
     
   // -----------------
@@ -235,7 +264,13 @@ module datapath(
     .ALUResultW (ALUResultW),
     .ReadDataW  (ReadDataW),
     .RdW        (RdW),
-    .PCPlus4W   (PCPlus4W)
+    .PCPlus4W   (PCPlus4W),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit.
+    .valid_in (validM),
+    .valid_out(validW)
+    // -------------------------------
   );
   
   // ----------------------
