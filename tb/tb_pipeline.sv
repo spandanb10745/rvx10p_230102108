@@ -49,7 +49,7 @@ module tb_pipeline();
 
   // Initialize test
   initial begin
-    reset <= 1; #22; // Assert reset for 22ns
+    reset <= 1; #20; // Assert reset for 20ns
     reset <= 0;      // De-assert reset
   end
 
