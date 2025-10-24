@@ -30,7 +30,7 @@ Resolves **Read-After-Write (RAW)** data hazards from **MEM** and **WB** stages.
 Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP insertion).
 
 ### ⚡ Performance
-- Achieves an **average CPI ≈ 1.241** on the comprehensive test suite.
+- Achieves an **average CPI ≈ 1.206** on the comprehensive test suite.
 - Demonstrates **high throughput and efficiency** compared to the single-cycle version.
 
 ---
