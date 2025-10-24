@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
 // Create Date: 22.10.2025 21:23:28
 // Design Name: 
@@ -15,6 +15,7 @@
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -23,11 +24,6 @@
  * @brief Datapath Pipeline register between Execution and Memory Access Stage.
  * @details Latches data signals passing from EX to MEM.
  * Has an asynchronous reset.
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param ...E    Inputs from Execute stage
- * @param ...M    Latched outputs for Memory stage
  */
 module IEx_IMem(
   input  logic       clk, reset,
@@ -36,7 +32,12 @@ module IEx_IMem(
   input  logic [31:0] PCPlus4E,
   output logic [31:0] ALUResultM, WriteDataM,
   output logic [4:0] RdM, 
-  output logic [31:0] PCPlus4M
+  output logic [31:0] PCPlus4M,
+
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from execute
+  output logic       valid_out  // Valid bit for memory
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin 
@@ -45,12 +46,14 @@ module IEx_IMem(
       WriteDataM <= 0;
       RdM        <= 0; 
       PCPlus4M   <= 0;
+      valid_out  <= 0; // Clear valid bit
     end
     else begin // Normal operation: latch inputs
       ALUResultM <= ALUResultE;
       WriteDataM <= WriteDataE;
       RdM        <= RdE; 
       PCPlus4M   <= PCPlus4E;      
+      valid_out  <= valid_in; // Propagate valid bit
     end
   end
 
