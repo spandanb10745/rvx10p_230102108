@@ -211,7 +211,7 @@ Multiple instructions in-flight — pipeline snapshots:
 Implementation and testbench display for cycle/instruction counters:
 
 ![Testbench Counter Logic (Declarations)](https://github.com/user-attachments/assets/1ce02f08-7541-4206-9576-5489033ae604)  
-![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/2f8540de-ccc5-40f7-ab8c-637543b610e5)  
+![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/8a60bbba-fd94-4178-9403-17bb6c92e714)  
 ![riscv module screenshot](https://github.com/user-attachments/assets/478d2116-d0a6-4f9b-b4bf-685a74c207fa)
 ![riscv module screenshot](https://github.com/user-attachments/assets/af6a1f69-6a3c-450c-94b8-ae87cb66896b)
 ![riscv module screenshot](https://github.com/user-attachments/assets/f59699b0-5e69-4e12-ba69-9436605c7028)
