@@ -72,12 +72,12 @@ always @(negedge clk) begin
         final_cycles = dut.rv.cycle_count;   // clock cycles (total)
         final_instrs = dut.rv.instr_retired; // instructions completed (total)
         
-        cpi = $itor(final_cycles) / $itor(final_instrs+1); // adjustments as sw and beq don't assert RegWriteW as 1 ( the no is variable , will depend on the testbench instructions)
+        cpi = $itor(final_cycles-2) / $itor(final_instrs); // adjustments as sw and beq don't assert RegWriteW as 1 ( the no is variable , will depend on the testbench instructions)
 
         $display("---------------------------------");
         $display("--- Performance (Bonus) ---");
-        $display("Total Cycles:         %0d", final_cycles); // as of first 2 cycles reset=1 to start the processor
-        $display("Instructions Retired: %0d", final_instrs+1);
+        $display("Total Cycles:         %0d", final_cycles-2); // as of first 2 cycles reset=1 to start the processor
+        $display("Instructions Retired: %0d", final_instrs);
         $display("Average CPI:          %f", cpi);
         $display("---------------------------------");
         
