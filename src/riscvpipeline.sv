@@ -69,9 +69,10 @@ module riscvpipeline (
     .rd  (ReadDataM)   // Read data output
   );
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: spandan_bharadwaj//230102108
+// Engineer: spandan_bharwaj//230102108
 // 
 // Create Date: 22.10.2025 21:00:00
 // Design Name: 
@@ -85,6 +86,7 @@ endmodule
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit for retirement counting
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -113,115 +115,222 @@ module riscv(
   logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E;
   logic [4:0] RdE, RdM, RdW;
   logic [1:0] ForwardAE, ForwardBE;
-
+  logic validD, validE, validM, validW; // Valid bits for each stage
+  
   // Instantiate the Pipelined Controller
   controller c(
-    .clk         (clk),
-    .reset       (reset),
-    .op          (InstrD[6:0]),
-    .funct3      (InstrD[14:12]),
-    .funct7b5    (InstrD[30]),
-    .funct7_2b   (InstrD[26:25]),
-    .ZeroE       (ZeroE),
-    .FlushE      (FlushE),
-    .ResultSrcE0 (ResultSrcE0),
-    .ResultSrcW  (ResultSrcW),
-    .MemWriteM   (MemWriteM),
-    .PCSrcE      (PCSrcE),
-    .ALUSrcE     (ALUSrcE),
-    .RegWriteM   (RegWriteM),
-    .RegWriteW   (RegWriteW),
-    .ImmSrcD     (ImmSrcD),
-    .ALUControlE (ALUControlE)
+    .clk        (clk),
+    .reset      (reset),
+    .op         (InstrD[6:0]),
+    .funct3     (InstrD[14:12]),
+    .funct7b5   (InstrD[30]),
+    .funct7_2b  (InstrD[26:25]),
+    .ZeroE      (ZeroE),
+    .FlushE     (FlushE),
+    .ResultSrcE0(ResultSrcE0),
+    .ResultSrcW (ResultSrcW),
+    .MemWriteM  (MemWriteM),
+    .PCSrcE     (PCSrcE),
+    .ALUSrcE    (ALUSrcE),
+    .RegWriteM  (RegWriteM),
+    .RegWriteW  (RegWriteW),
+    .ImmSrcD    (ImmSrcD),
+    .ALUControlE(ALUControlE)
   );
 
   // *** NEW SEPARATED UNITS (ADDED) ***
   
   // Instantiate the new Forwarding Unit
   forwarding_unit fu (
-    .Rs1E      (Rs1E), 
-    .Rs2E      (Rs2E),
-    .RdM       (RdM), 
-    .RdW       (RdW),
-    .RegWriteM (RegWriteM), 
-    .RegWriteW (RegWriteW),
-    .ForwardAE (ForwardAE), 
-    .ForwardBE (ForwardBE)
+    .Rs1E     (Rs1E), 
+    .Rs2E     (Rs2E),
+    .RdM      (RdM), 
+    .RdW      (RdW),
+    .RegWriteM(RegWriteM), 
+    .RegWriteW(RegWriteW),
+    .ForwardAE(ForwardAE), 
+    .ForwardBE(ForwardBE)
   );
 
   // Instantiate the new Hazard Unit
   hazard_unit hu (
-    .Rs1D        (Rs1D), 
-    .Rs2D        (Rs2D),
-    .RdE         (RdE),
-    .ResultSrcE0 (ResultSrcE0),
-    .PCSrcE      (PCSrcE),
-    .StallD      (StallD), 
-    .StallF      (StallF), 
-    .FlushD      (FlushD), 
-    .FlushE      (FlushE)
+    .Rs1D       (Rs1D), 
+    .Rs2D       (Rs2D),
+    .RdE        (RdE),
+    .ResultSrcE0(ResultSrcE0),
+    .PCSrcE     (PCSrcE),
+    .StallD     (StallD), 
+    .StallF     (StallF), 
+    .FlushD     (FlushD), 
+    .FlushE     (FlushE)
   );
   // *** END OF NEW INSTANTIATIONS ***
 
   // Instantiate the 5-Stage Pipelined Datapath
   datapath dp(
-    .clk         (clk),
-    .reset       (reset),
-    .ResultSrcW  (ResultSrcW),
-    .PCSrcE      (PCSrcE),
-    .ALUSrcE     (ALUSrcE),
-    .RegWriteW   (RegWriteW),
-    .ImmSrcD     (ImmSrcD),
-    .ALUControlE (ALUControlE),
-    .ZeroE       (ZeroE),
-    .PCF         (PCF),
-    .InstrF      (InstrF),
-    .InstrD      (InstrD),
-    .ALUResultM  (ALUResultM),
-    .WriteDataM  (WriteDataM),
-    .ReadDataM   (ReadDataM),
-    .ForwardAE   (ForwardAE),
-    .ForwardBE   (ForwardBE),
-    .Rs1D        (Rs1D),
-    .Rs2D        (Rs2D),
-    .Rs1E        (Rs1E),
-    .Rs2E        (Rs2E),
-    .RdE         (RdE),
-    .RdM         (RdM),
-    .RdW         (RdW),
-    .StallD      (StallD),
-    .StallF      (StallF),
-    .FlushD      (FlushD),
-    .FlushE      (FlushE)
+    .clk        (clk),
+    .reset      (reset),
+    .ResultSrcW (ResultSrcW),
+    .PCSrcE     (PCSrcE),
+    .ALUSrcE    (ALUSrcE),
+    .RegWriteW  (RegWriteW),
+    .ImmSrcD    (ImmSrcD),
+    .ALUControlE(ALUControlE),
+    .ZeroE      (ZeroE),
+    .PCF        (PCF),
+    .InstrF     (InstrF),
+    .InstrD     (InstrD),
+    .ALUResultM (ALUResultM),
+    .WriteDataM (WriteDataM),
+    .ReadDataM  (ReadDataM),
+    .ForwardAE  (ForwardAE),
+    .ForwardBE  (ForwardBE),
+    .Rs1D       (Rs1D),
+    .Rs2D       (Rs2D),
+    .Rs1E       (Rs1E),
+    .Rs2E       (Rs2E),
+    .RdE        (RdE),
+    .RdM        (RdM),
+    .RdW        (RdW),
+    .StallD     (StallD),
+    .StallF     (StallF),
+    .FlushD     (FlushD),
+    .FlushE     (FlushE),
+
+    // --- MODIFICATION: VALID BITS ADDED ---
+    .validD     (validD),
+    .validE     (validE),
+    .validM     (validM),
+    .validW     (validW)
+    // --------------------------------------
   );
   
   // --- Performance Counters (Bonus) ---
-logic [31:0] cycle_count;
-logic [31:0] instr_retired;
-// ------------------------------------
+  logic [31:0] cycle_count;
+  logic [31:0] instr_retired;
+  // ------------------------------------
 
-// --- Performance Counter Logic (Bonus) ---
-always_ff @(posedge clk, posedge reset) begin
+  // --- Performance Counter Logic (Bonus) ---
+  always_ff @(posedge clk, posedge reset) begin
     if (reset) begin
-        // Reset counters to zero
-        cycle_count   <= '0; // Use '0 to set all bits to zero
-        instr_retired <= '0;
+      // Reset counters to zero
+      cycle_count   <= '0; // Use '0 to set all bits to zero
+      instr_retired <= '0;
     end
     else begin
-        // Always increment the cycle counter
-        cycle_count <= cycle_count + 1;
+      // Always increment the cycle counter
+      cycle_count <= cycle_count + 1;
 
-        // Increment instruction counter ONLY if an instruction
-        // is successfully writing to the register file in the
-        // WriteBack (WB) stage.
-        if (RegWriteW) begin
-            instr_retired <= instr_retired + 1;
-        end
+      // --- MODIFICATION: RETIREMENT LOGIC ---
+      // Increment instruction counter ONLY if a VALID instruction
+      // reaches the WriteBack (WB) stage. This correctly
+      // counts ALL retired instructions (R-type, I-type, loads,
+      // stores, and branches) and ignores flushed bubbles.
+      if (validW) begin
+        instr_retired <= instr_retired + 1;
+      end
+      // --------------------------------------
     end
-end
-// -----------------------------------------
+  end
+  // -----------------------------------------
 
 endmodule
+
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: //spandan_bharadwaj_230102108
+// 
+// Create Date: 22.09.2025 07:20:29
+// Design Name: 
+// Module Name: imem
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: Instruction Memory
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Instruction Memory module.
+ * @details A simple ROM initialized from an external file ("risctest.mem").
+ * Implements combinational read.
+ *
+ * @param a   32-bit address input (word-aligned).
+ * @param rd  32-bit read data (instruction) output.
+ */
+module imem (
+  input  logic [31:0] a,  // Address
+  output logic [31:0] rd  // Read data (instruction)
+);
+  // Memory array (64 entries, 32-bits wide)
+  logic [31:0] RAM[63:0];
+
+  // Initialize memory from file
+  initial begin
+    // Load the contents of "risctest.mem" into the RAM array
+    $readmemh("risctest.mem", RAM);
+  end
+    
+  // Combinational read (uses lower bits of 'a' as word index)
+  assign rd = RAM[a[31:2]]; // word-aligned
+
+endmodule
+
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: spandan_bharadwaj_230102108
+// 
+// Create Date: 22.09.2025 07:11:54
+// Design Name: 
+// Module Name: dmem
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: Data Memory
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief Data Memory module.
+ * @details A simple RAM (Random Access Memory).
+ * Implements combinational read and synchronous write.
+ *
+ * @param clk Clock signal.
+ * @param we  Write enable signal.
+ * @param a   32-bit address input.
+ * @param wd  32-bit write data input.
+ * @param rd  32-bit read data output.
+ */
+module dmem(
+  input  logic       clk, we,
+  input  logic [31:0] a, wd,
+  output logic [31:0] rd
+);
+    
+  // Memory array (64 entries, 32-bits wide)
+  logic [31:0] RAM [63:0];
+    
+  // Combinational read (word-aligned)
+  assign rd = RAM[a[31:2]]; 
+    
+  // Synchronous write (on positive clock edge)
+  always_ff @(posedge clk)
+    if (we) RAM[a[31:2]] <= wd;
+    
+endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: spandan_bharadwaj//230102108
@@ -354,354 +463,7 @@ module controller(
   assign PCSrcE = (BranchE & ZeroE) | JumpE;
 
 endmodule
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: //spandan_bharadwaj_230102108
-// 
-// Create Date: 22.09.2025 11:12:33
-// Design Name: 
-// Module Name: datapath
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 5-Stage Pipelined Datapath for RVX10-P
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created (single-cycle)
-// Revision 0.02 - Converted to 5-stage pipeline
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief 5-stage pipelined datapath.
- * @details Contains all the functional units (ALU, regfile, muxes, adders)
- * and pipeline registers for the datapath.
- */
-module datapath(
-  input  logic       clk, reset,
-  input  logic [1:0] ResultSrcW,
-  input  logic       PCSrcE, ALUSrcE, 
-  input  logic       RegWriteW,
-  input  logic [1:0] ImmSrcD,
-  input  logic [3:0] ALUControlE,
-  output logic       ZeroE,
-  output logic [31:0] PCF,
-  input  logic [31:0] InstrF,
-  output logic [31:0] InstrD,
-  output logic [31:0] ALUResultM, WriteDataM,
-  input  logic [31:0] ReadDataM,
-  input  logic [1:0] ForwardAE, ForwardBE,
-  output logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E,
-  output logic [4:0] RdE, RdM, RdW,
-  input  logic       StallD, StallF, FlushD, FlushE
-);
-
-  // Internal datapath signals
-  logic [31:0] PCD, PCE, ALUResultE, ALUResultW, ReadDataW;
-  logic [31:0] PCNextF, PCPlus4F, PCPlus4D, PCPlus4E, PCPlus4M, PCPlus4W, PCTargetE;
-  logic [31:0] WriteDataE;
-  logic [31:0] ImmExtD, ImmExtE;
-  logic [31:0] SrcAE, SrcBE, RD1D, RD2D, RD1E, RD2E;
-  logic [31:0] ResultW;
-  logic [4:0] RdD; // destination register address
-
-    
-  // -----------------
-  // --- Fetch Stage ---
-  // -----------------
-    
-  // Mux to select next PC (either PC+4 or branch/jump target)
-  mux2 #(.WIDTH(32)) pcmux(
-    .d0 (PCPlus4F),
-    .d1 (PCTargetE),
-    .s  (PCSrcE),
-    .y  (PCNextF)
-  );
-  
-  // PC Register (stalls if StallF is high)
-  flopenr #(.WIDTH(32)) IF(
-    .clk   (clk),
-    .reset (reset),
-    .en    (~StallF), // Enable only if not stalling
-    .d     (PCNextF),
-    .q     (PCF)
-  );
-  
-  // Adder for PC + 4
-  adder pcadd4(
-    .a (PCF),
-    .b (32'd4),
-    .y (PCPlus4F)
-  );
-    
-  // ---------------------------------------------------
-  // --- Instruction Fetch - Decode Pipeline Register ---
-  // ---------------------------------------------------
-    
-  IF_ID pipreg0 (
-    .clk      (clk),
-    .reset    (reset),
-    .clear    (FlushD),  // Flush if branch taken
-    .enable   (~StallD), // Stall for load-use
-    .InstrF   (InstrF),
-    .PCF      (PCF),
-    .PCPlus4F (PCPlus4F),
-    .InstrD   (InstrD),
-    .PCD      (PCD),
-    .PCPlus4D (PCPlus4D)
-  );
-  
-  // ------------------
-  // --- Decode Stage ---
-  // ------------------
-  
-  // Extract register addresses from instruction
-  assign Rs1D = InstrD[19:15];
-  assign Rs2D = InstrD[24:20];  
-  assign RdD  = InstrD[11:7];
-  
-  // Register File
-  regfile rf (
-    .clk (clk),
-    .we3 (RegWriteW), // Write enable from WB stage
-    .a1  (Rs1D),      // Read address 1
-    .a2  (Rs2D),      // Read address 2
-    .a3  (RdW),       // Write address from WB stage
-    .wd3 (ResultW),   // Write data from WB stage
-    .rd1 (RD1D),      // Read data 1 output
-    .rd2 (RD2D)       // Read data 2 output
-  );  
-  
-  // Sign/Immediate Extension Unit
-  extend ext(
-    .instr  (InstrD[31:7]),
-    .immsrc (ImmSrcD),
-    .immext (ImmExtD)
-  );
-    
-  // ------------------------------------------------
-  // --- Decode - Execute Pipeline Register ---
-  // ------------------------------------------------
-    
-  ID_IEx pipreg1 (
-    .clk      (clk),
-    .reset    (reset),
-    .clear    (FlushE), // Flush for stalls or taken branches
-    .RD1D     (RD1D),
-    .RD2D     (RD2D),
-    .PCD      (PCD),
-    .Rs1D     (Rs1D),
-    .Rs2D     (Rs2D),
-    .RdD      (RdD),
-    .ImmExtD  (ImmExtD),
-    .PCPlus4D (PCPlus4D),
-    .RD1E     (RD1E),
-    .RD2E     (RD2E),
-    .PCE      (PCE),
-    .Rs1E     (Rs1E),
-    .Rs2E     (Rs2E),
-    .RdE      (RdE),
-    .ImmExtE  (ImmExtE),
-    .PCPlus4E (PCPlus4E)
-  );
-  
-  // -------------------
-  // --- Execute Stage ---
-  // -------------------
-  
-  // Forwarding Mux for ALU Operand A
-  mux3 #(.WIDTH(32)) forwardMuxA (
-    .d0 (RD1E),       // 00: From register file (RD1E)
-    .d1 (ResultW),    // 01: From WriteBack (ResultW)
-    .d2 (ALUResultM), // 10: From Memory (ALUResultM)
-    .s  (ForwardAE),
-    .y  (SrcAE)
-  );
-  
-  // Forwarding Mux for ALU Operand B (also serves as WriteData for 'sw')
-  mux3 #(.WIDTH(32)) forwardMuxB (
-    .d0 (RD2E),       // 00: From register file (RD2E)
-    .d1 (ResultW),    // 01: From WriteBack (ResultW)
-    .d2 (ALUResultM), // 10: From Memory (ALUResultM)
-    .s  (ForwardBE),
-    .y  (WriteDataE)  // This is data to be written for 'sw'
-  );
-  
-  // Mux to select ALU Operand B (either from regfile/forward or immediate)
-  mux2 #(.WIDTH(32)) srcbmux(
-    .d0 (WriteDataE), // From regfile/forwarding
-    .d1 (ImmExtE),    // From immediate extender
-    .s  (ALUSrcE),
-    .y  (SrcBE)
-  ); 
-  
-  // Adder for branch/jump target address
-  adder pcaddbranch(
-    .a (PCE),
-    .b (ImmExtE),
-    .y (PCTargetE)
-  ); 
-  
-  // The main Arithmetic Logic Unit (ALU)
-  alu alu(
-    .a          (SrcAE),
-    .b          (SrcBE),
-    .alucontrol (ALUControlE),
-    .result     (ALUResultE),
-    .zero       (ZeroE)
-  );
-    
-  // ----------------------------------------------------
-  // --- Execute - Memory Access Pipeline Register ---
-  // ----------------------------------------------------
-  
-  IEx_IMem pipreg2 (
-    .clk        (clk),
-    .reset      (reset),
-    .ALUResultE (ALUResultE),
-    .WriteDataE (WriteDataE),
-    .RdE        (RdE),
-    .PCPlus4E   (PCPlus4E),
-    .ALUResultM (ALUResultM),
-    .WriteDataM (WriteDataM),
-    .RdM        (RdM),
-    .PCPlus4M   (PCPlus4M)
-  );
-    
-  // -----------------
-  // --- Memory Stage ---
-  // -----------------
-  // (No components here, just wires to 'top' module's dmem)
-    
-  // --------------------------------------------------
-  // --- Memory - Register Write Back Stage Register ---
-  // --------------------------------------------------
-  
-  IMem_IW pipreg3 (
-    .clk        (clk),
-    .reset      (reset),
-    .ALUResultM (ALUResultM),
-    .ReadDataM  (ReadDataM),
-    .RdM        (RdM),
-    .PCPlus4M   (PCPlus4M),
-    .ALUResultW (ALUResultW),
-    .ReadDataW  (ReadDataW),
-    .RdW        (RdW),
-    .PCPlus4W   (PCPlus4W)
-  );
-  
-  // ----------------------
-  // --- WriteBack Stage ---
-  // ----------------------
-  
-  // Mux to select the final result to write back to the register file
-  mux3 #(.WIDTH(32)) resultmux(
-    .d0 (ALUResultW), // 00: From ALU
-    .d1 (ReadDataW),  // 01: From Data Memory
-    .d2 (PCPlus4W),   // 10: From PC+4 (for JAL)
-    .s  (ResultSrcW),
-    .y  (ResultW)
-  );
-
-endmodule
-`timescale 1ns / 1ps
-/**
- * @brief Forwarding unit for data hazards.
- * @details Detects RAW hazards between EX, MEM, and WB stages.
- * Generates control signals to forward data from later stages
- * to the inputs of the ALU in the EX stage.
- *
- * @param Rs1E, Rs2E  Source register addresses in Execute stage.
- * @param RdM, RdW    Destination register addresses in Memory and WriteBack stages.
- * @param RegWriteM, RegWriteW  Write enable signals for MEM and WB stages.
- * @param ForwardAE, ForwardBE  Output control signals for ALU operand muxes.
- */
-module forwarding_unit(
-  input  logic [4:0] Rs1E, Rs2E,  // Source registers in Execute
-  input  logic [4:0] RdM, RdW,     // Destination registers in Memory & WriteBack
-  input  logic       RegWriteM,   // Write enable in Memory
-  input  logic       RegWriteW,   // Write enable in WriteBack
-  output logic [1:0] ForwardAE,  // Forwarding control for ALU operand A
-  output logic [1:0] ForwardBE   // Forwarding control for ALU operand B
-);
-
-  // Combinational logic for forwarding
-  always_comb begin
-    // --- Defaults (no forwarding) ---
-    ForwardAE = 2'b00;
-    ForwardBE = 2'b00;
-
-    // --- Forwarding for Rs1 (Operand A) ---
-    
-    // EX/MEM Hazard: Forward from Memory stage (highest priority)
-    // If Rs1 in EX matches Rd in MEM, and MEM is writing, forward ALUResultM
-    if ((Rs1E == RdM) & RegWriteM & (Rs1E != 0))
-      ForwardAE = 2'b10; // Forward ALUResultM
-        
-    // MEM/WB Hazard: Forward from WriteBack stage
-    // Else if Rs1 in EX matches Rd in WB, and WB is writing, forward ResultW
-    else if ((Rs1E == RdW) & RegWriteW & (Rs1E != 0))
-      ForwardAE = 2'b01; // Forward ResultW
-
-        
-    // --- Forwarding for Rs2 (Operand B) ---
-    
-    // EX/MEM Hazard: Forward from Memory stage (highest priority)
-    // If Rs2 in EX matches Rd in MEM, and MEM is writing, forward ALUResultM
-    if ((Rs2E == RdM) & RegWriteM & (Rs2E != 0))
-      ForwardBE = 2'b10; // Forward ALUResultM
-        
-    // MEM/WB Hazard: Forward from WriteBack stage
-    // Else if Rs2 in EX matches Rd in WB, and WB is writing, forward ResultW
-    else if ((Rs2E == RdW) & RegWriteW & (Rs2E != 0))
-      ForwardBE = 2'b01; // Forward ResultW
-  end
-
-endmodule
-/**
- * @brief Hazard detection unit.
- * @details Detects load-use hazards (data hazard requiring a stall)
- * and control hazards (from taken branches).
- * Generates stall and flush signals for the pipeline.
- *
- * @param Rs1D, Rs2D    Source register addresses in Decode stage.
- * @param RdE           Destination register address in Execute stage.
- * @param ResultSrcE0   Control signal (1 if instruction in EX is 'lw').
- * @param PCSrcE        Control signal (1 if branch is taken in EX).
- * @param StallD, StallF Output signals to stall Decode and Fetch stages.
- * @param FlushD, FlushE Output signals to flush Decode and Execute stages.
- */
-module hazard_unit(
-  input  logic [4:0] Rs1D, Rs2D,    // Source registers in Decode
-  input  logic [4:0] RdE,           // Destination register in Execute
-  input  logic       ResultSrcE0,   // Control signal: 1 if instruction in EXE is a load
-  input  logic       PCSrcE,        // Control signal: 1 if branch is taken
-  output logic       StallD, StallF,  // Stall signals for Fetch and Decode
-  output logic       FlushD, FlushE   // Flush signals for Decode and Execute
-);
-
-  // --- Load-Use Hazard Detection ---
-  // Stall if instruction in Decode needs data from a load in Execute
-  logic lwStall;
-  assign lwStall = (ResultSrcE0 == 1) & ((RdE == Rs1D) | (RdE == Rs2D));
-
-  // Stall the pipeline for one cycle
-  assign StallF = lwStall; // Stall PC and IF/ID pipeline register
-  assign StallD = lwStall; // Stall ID/EX pipeline register
-    
-  // --- Flush Logic ---
-    
-  // Flush Execute stage if a load-use stall occurs (insert bubble)
-  // OR if a branch is taken (instruction in EXE is wrong)
-  assign FlushE = lwStall | PCSrcE;
-    
-  // Flush Decode stage only if a branch is taken (instruction in DEC is wrong)
-  assign FlushD = PCSrcE;
-
-endmodule
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: spandan_bharadwaj_230102108
@@ -768,6 +530,7 @@ module maindec(
       default:    controls = 11'bx_xx_x_x_xx_x_xx_x; // non-implemented instruction
     endcase
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: spandan_bharadwaj_230102108
@@ -855,6 +618,7 @@ module aludec(
       default: ALUControl = 4'bxxxx; // ???
     endcase
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -927,6 +691,7 @@ module c_ID_IEx (
   end
   
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -1030,6 +795,392 @@ module c_IM_IW (
   end
 
 endmodule
+
+/**
+ * @brief Forwarding unit for data hazards.
+ * @details Detects RAW hazards between EX, MEM, and WB stages.
+ * Generates control signals to forward data from later stages
+ * to the inputs of the ALU in the EX stage.
+ *
+ * @param Rs1E, Rs2E  Source register addresses in Execute stage.
+ * @param RdM, RdW    Destination register addresses in Memory and WriteBack stages.
+ * @param RegWriteM, RegWriteW  Write enable signals for MEM and WB stages.
+ * @param ForwardAE, ForwardBE  Output control signals for ALU operand muxes.
+ */
+module forwarding_unit(
+  input  logic [4:0] Rs1E, Rs2E,  // Source registers in Execute
+  input  logic [4:0] RdM, RdW,     // Destination registers in Memory & WriteBack
+  input  logic       RegWriteM,   // Write enable in Memory
+  input  logic       RegWriteW,   // Write enable in WriteBack
+  output logic [1:0] ForwardAE,  // Forwarding control for ALU operand A
+  output logic [1:0] ForwardBE   // Forwarding control for ALU operand B
+);
+
+  // Combinational logic for forwarding
+  always_comb begin
+    // --- Defaults (no forwarding) ---
+    ForwardAE = 2'b00;
+    ForwardBE = 2'b00;
+
+    // --- Forwarding for Rs1 (Operand A) ---
+    
+    // EX/MEM Hazard: Forward from Memory stage (highest priority)
+    // If Rs1 in EX matches Rd in MEM, and MEM is writing, forward ALUResultM
+    if ((Rs1E == RdM) & RegWriteM & (Rs1E != 0))
+      ForwardAE = 2'b10; // Forward ALUResultM
+        
+    // MEM/WB Hazard: Forward from WriteBack stage
+    // Else if Rs1 in EX matches Rd in WB, and WB is writing, forward ResultW
+    else if ((Rs1E == RdW) & RegWriteW & (Rs1E != 0))
+      ForwardAE = 2'b01; // Forward ResultW
+
+        
+    // --- Forwarding for Rs2 (Operand B) ---
+    
+    // EX/MEM Hazard: Forward from Memory stage (highest priority)
+    // If Rs2 in EX matches Rd in MEM, and MEM is writing, forward ALUResultM
+    if ((Rs2E == RdM) & RegWriteM & (Rs2E != 0))
+      ForwardBE = 2'b10; // Forward ALUResultM
+        
+    // MEM/WB Hazard: Forward from WriteBack stage
+    // Else if Rs2 in EX matches Rd in WB, and WB is writing, forward ResultW
+    else if ((Rs2E == RdW) & RegWriteW & (Rs2E != 0))
+      ForwardBE = 2'b01; // Forward ResultW
+  end
+
+endmodule
+
+/**
+ * @brief Hazard detection unit.
+ * @details Detects load-use hazards (data hazard requiring a stall)
+ * and control hazards (from taken branches).
+ * Generates stall and flush signals for the pipeline.
+ *
+ * @param Rs1D, Rs2D    Source register addresses in Decode stage.
+ * @param RdE           Destination register address in Execute stage.
+ * @param ResultSrcE0   Control signal (1 if instruction in EX is 'lw').
+ * @param PCSrcE        Control signal (1 if branch is taken in EX).
+ * @param StallD, StallF Output signals to stall Decode and Fetch stages.
+ * @param FlushD, FlushE Output signals to flush Decode and Execute stages.
+ */
+module hazard_unit(
+  input  logic [4:0] Rs1D, Rs2D,    // Source registers in Decode
+  input  logic [4:0] RdE,           // Destination register in Execute
+  input  logic       ResultSrcE0,   // Control signal: 1 if instruction in EXE is a load
+  input  logic       PCSrcE,        // Control signal: 1 if branch is taken
+  output logic       StallD, StallF,  // Stall signals for Fetch and Decode
+  output logic       FlushD, FlushE   // Flush signals for Decode and Execute
+);
+
+  // --- Load-Use Hazard Detection ---
+  // Stall if instruction in Decode needs data from a load in Execute
+  logic lwStall;
+  assign lwStall = (ResultSrcE0 == 1) & ((RdE == Rs1D) | (RdE == Rs2D));
+
+  // Stall the pipeline for one cycle
+  assign StallF = lwStall; // Stall PC and IF/ID pipeline register
+  assign StallD = lwStall; // Stall ID/EX pipeline register
+    
+  // --- Flush Logic ---
+    
+  // Flush Execute stage if a load-use stall occurs (insert bubble)
+  // OR if a branch is taken (instruction in EXE is wrong)
+  assign FlushE = lwStall | PCSrcE;
+    
+  // Flush Decode stage only if a branch is taken (instruction in DEC is wrong)
+  assign FlushD = PCSrcE;
+
+endmodule
+
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: //spandan_bharadwaj_230102108
+// 
+// Create Date: 22.09.2025 11:12:33
+// Design Name: 
+// Module Name: datapath
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 5-Stage Pipelined Datapath for RVX10-P
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created (single-cycle)
+// Revision 0.02 - Converted to 5-stage pipeline
+// Revision 0.03 - Added valid bit propagation
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @brief 5-stage pipelined datapath.
+ * @details Contains all the functional units (ALU, regfile, muxes, adders)
+ * and pipeline registers for the datapath.
+ */
+module datapath(
+  input  logic       clk, reset,
+  input  logic [1:0] ResultSrcW,
+  input  logic       PCSrcE, ALUSrcE, 
+  input  logic       RegWriteW,
+  input  logic [1:0] ImmSrcD,
+  input  logic [3:0] ALUControlE,
+  output logic       ZeroE,
+  output logic [31:0] PCF,
+  input  logic [31:0] InstrF,
+  output logic [31:0] InstrD,
+  output logic [31:0] ALUResultM, WriteDataM,
+  input  logic [31:0] ReadDataM,
+  input  logic [1:0] ForwardAE, ForwardBE,
+  output logic [4:0] Rs1D, Rs2D, Rs1E, Rs2E,
+  output logic [4:0] RdE, RdM, RdW,
+  input  logic       StallD, StallF, FlushD, FlushE,
+
+  // --- MODIFICATION: VALID BITS ADDED ---
+  output logic       validD,
+  output logic       validE,
+  output logic       validM,
+  output logic       validW
+  // --------------------------------------
+);
+
+  // Internal datapath signals
+  logic [31:0] PCD, PCE, ALUResultE, ALUResultW, ReadDataW;
+  logic [31:0] PCNextF, PCPlus4F, PCPlus4D, PCPlus4E, PCPlus4M, PCPlus4W, PCTargetE;
+  logic [31:0] WriteDataE;
+  logic [31:0] ImmExtD, ImmExtE;
+  logic [31:0] SrcAE, SrcBE, RD1D, RD2D, RD1E, RD2E;
+  logic [31:0] ResultW;
+  logic [4:0] RdD; // destination register address
+
+    
+  // -----------------
+  // --- Fetch Stage ---
+  // -----------------
+    
+  // Mux to select next PC (either PC+4 or branch/jump target)
+  mux2 #(.WIDTH(32)) pcmux(
+    .d0 (PCPlus4F),
+    .d1 (PCTargetE),
+    .s  (PCSrcE),
+    .y  (PCNextF)
+  );
+  
+  // PC Register (stalls if StallF is high)
+  flopenr #(.WIDTH(32)) IF(
+    .clk   (clk),
+    .reset (reset),
+    .en    (~StallF), // Enable only if not stalling
+    .d     (PCNextF),
+    .q     (PCF)
+  );
+  
+  // Adder for PC + 4
+  adder pcadd4(
+    .a (PCF),
+    .b (32'd4),
+    .y (PCPlus4F)
+  );
+    
+  // ---------------------------------------------------
+  // --- Instruction Fetch - Decode Pipeline Register ---
+  // ---------------------------------------------------
+    
+  IF_ID pipreg0 (
+    .clk      (clk),
+    .reset    (reset),
+    .clear    (FlushD),  // Flush if branch taken
+    .enable   (~StallD), // Stall for load-use
+    .InstrF   (InstrF),
+    .PCF      (PCF),
+    .PCPlus4F (PCPlus4F),
+    .InstrD   (InstrD),
+    .PCD      (PCD),
+    .PCPlus4D (PCPlus4D),
+
+    // --- MODIFICATION: VALID BIT ---
+    // A new instruction is always valid (1'b1).
+    // On stall, 'enable' is false, so 'validD' holds.
+    // On flush, 'clear' is true, so 'validD' becomes 0.
+    .valid_in (1'b1),
+    .valid_out(validD)
+    // -------------------------------
+  );
+  
+  // ------------------
+  // --- Decode Stage ---
+  // ------------------
+  
+  // Extract register addresses from instruction
+  assign Rs1D = InstrD[19:15];
+  assign Rs2D = InstrD[24:20];  
+  assign RdD  = InstrD[11:7];
+  
+  // Register File
+  regfile rf (
+    .clk (clk),
+    .we3 (RegWriteW), // Write enable from WB stage
+    .a1  (Rs1D),      // Read address 1
+    .a2  (Rs2D),      // Read address 2
+    .a3  (RdW),       // Write address from WB stage
+    .wd3 (ResultW),   // Write data from WB stage
+    .rd1 (RD1D),      // Read data 1 output
+    .rd2 (RD2D)       // Read data 2 output
+  );  
+  
+  // Sign/Immediate Extension Unit
+  extend ext(
+    .instr  (InstrD[31:7]),
+    .immsrc (ImmSrcD),
+    .immext (ImmExtD)
+  );
+    
+  // ------------------------------------------------
+  // --- Decode - Execute Pipeline Register ---
+  // ------------------------------------------------
+    
+  ID_IEx pipreg1 (
+    .clk      (clk),
+    .reset    (reset),
+    .clear    (FlushE), // Flush for stalls or taken branches
+    .RD1D     (RD1D),
+    .RD2D     (RD2D),
+    .PCD      (PCD),
+    .Rs1D     (Rs1D),
+    .Rs2D     (Rs2D),
+    .RdD      (RdD),
+    .ImmExtD  (ImmExtD),
+    .PCPlus4D (PCPlus4D),
+    .RD1E     (RD1E),
+    .RD2E     (RD2E),
+    .PCE      (PCE),
+    .Rs1E     (Rs1E),
+    .Rs2E     (Rs2E),
+    .RdE      (RdE),
+    .ImmExtE  (ImmExtE),
+    .PCPlus4E (PCPlus4E),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit. 'clear' (FlushE) will set validE to 0.
+    // This register has no 'enable', so it never stalls.
+    .valid_in (validD),
+    .valid_out(validE)
+    // -------------------------------
+  );
+  
+  // -------------------
+  // --- Execute Stage ---
+  // -------------------
+  
+  // Forwarding Mux for ALU Operand A
+  mux3 #(.WIDTH(32)) forwardMuxA (
+    .d0 (RD1E),       // 00: From register file (RD1E)
+    .d1 (ResultW),    // 01: From WriteBack (ResultW)
+    .d2 (ALUResultM), // 10: From Memory (ALUResultM)
+    .s  (ForwardAE),
+    .y  (SrcAE)
+  );
+  
+  // Forwarding Mux for ALU Operand B (also serves as WriteData for 'sw')
+  mux3 #(.WIDTH(32)) forwardMuxB (
+    .d0 (RD2E),       // 00: From register file (RD2E)
+    .d1 (ResultW),    // 01: From WriteBack (ResultW)
+    .d2 (ALUResultM), // 10: From Memory (ALUResultM)
+    .s  (ForwardBE),
+    .y  (WriteDataE)  // This is data to be written for 'sw'
+  );
+  
+  // Mux to select ALU Operand B (either from regfile/forward or immediate)
+  mux2 #(.WIDTH(32)) srcbmux(
+    .d0 (WriteDataE), // From regfile/forwarding
+    .d1 (ImmExtE),    // From immediate extender
+    .s  (ALUSrcE),
+    .y  (SrcBE)
+  );  
+  
+  // Adder for branch/jump target address
+  adder pcaddbranch(
+    .a (PCE),
+    .b (ImmExtE),
+    .y (PCTargetE)
+  );  
+  
+  // The main Arithmetic Logic Unit (ALU)
+  alu alu(
+    .a          (SrcAE),
+    .b          (SrcBE),
+    .alucontrol (ALUControlE),
+    .result     (ALUResultE),
+    .zero       (ZeroE)
+  );
+    
+  // ----------------------------------------------------
+  // --- Execute - Memory Access Pipeline Register ---
+  // ----------------------------------------------------
+  
+  IEx_IMem pipreg2 (
+    .clk        (clk),
+    .reset      (reset),
+    .ALUResultE (ALUResultE),
+    .WriteDataE (WriteDataE),
+    .RdE        (RdE),
+    .PCPlus4E   (PCPlus4E),
+    .ALUResultM (ALUResultM),
+    .WriteDataM (WriteDataM),
+    .RdM        (RdM),
+    .PCPlus4M   (PCPlus4M),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit.
+    .valid_in (validE),
+    .valid_out(validM)
+    // -------------------------------
+  );
+    
+  // -----------------
+  // --- Memory Stage ---
+  // -----------------
+  // (No components here, just wires to 'top' module's dmem)
+    
+  // --------------------------------------------------
+  // --- Memory - Register Write Back Stage Register ---
+  // --------------------------------------------------
+  
+  IMem_IW pipreg3 (
+    .clk        (clk),
+    .reset      (reset),
+    .ALUResultM (ALUResultM),
+    .ReadDataM  (ReadDataM),
+    .RdM        (RdM),
+    .PCPlus4M   (PCPlus4M),
+    .ALUResultW (ALUResultW),
+    .ReadDataW  (ReadDataW),
+    .RdW        (RdW),
+    .PCPlus4W   (PCPlus4W),
+
+    // --- MODIFICATION: VALID BIT ---
+    // Propagate valid bit.
+    .valid_in (validM),
+    .valid_out(validW)
+    // -------------------------------
+  );
+  
+  // ----------------------
+  // --- WriteBack Stage ---
+  // ----------------------
+  
+  // Mux to select the final result to write back to the register file
+  mux3 #(.WIDTH(32)) resultmux(
+    .d0 (ALUResultW), // 00: From ALU
+    .d1 (ReadDataW),  // 01: From Data Memory
+    .d2 (PCPlus4W),   // 10: From PC+4 (for JAL)
+    .s  (ResultSrcW),
+    .y  (ResultW)
+  );
+
+endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1063,6 +1214,7 @@ module mux2 #(parameter WIDTH=8)(
   // If s=1, select d1; otherwise select d0
   assign y = s ? d1 : d0;
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -1111,6 +1263,7 @@ module flopenr #(
   end
 
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1141,11 +1294,12 @@ module adder(
 
   assign y = a + b;
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
-// Create Date: 
+// Create Date: 22.10.2025 21:21:58
 // Design Name: 
 // Module Name: IF_ID
 // Project Name: 
@@ -1157,26 +1311,25 @@ endmodule
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
 /**
  * @brief Datapath Pipeline register between Fetch and Decode Stage.
- * @details Has asynchronous reset, synchronous enable (stall), and
- * synchronous clear (flush).
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param clear   Synchronous clear (flushes to a 'nop' instruction)
- * @param enable  Synchronous enable (stalls if low)
- * @param ...F    Inputs from Fetch stage
- * @param ...D    Latched outputs for Decode stage
+ * @details Latches data signals passing from IF to ID.
+ * Has asynchronous reset, synchronous clear (flush), and enable (stall).
  */
 module IF_ID (
   input  logic       clk, reset, clear, enable,
   input  logic [31:0] InstrF, PCF, PCPlus4F,
-  output logic [31:0] InstrD, PCD, PCPlus4D
+  output logic [31:0] InstrD, PCD, PCPlus4D,
+  
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from fetch (always 1'b1)
+  output logic       valid_out  // Valid bit for decode
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin
@@ -1184,23 +1337,27 @@ module IF_ID (
       InstrD   <= 0;
       PCD      <= 0;
       PCPlus4D <= 0;
+      valid_out<= 0; // Clear valid bit
     end
     else if (enable) begin // Only latch if enabled (not stalled)
       if (clear) begin // Synchronous Clear (flushes to a NOP)
         InstrD   <= 32'h00000033; // add x0,x0,x0 (nop)
         PCD      <= 0;
-        PCPlus4D <= 0;   
+        PCPlus4D <= 0; 
+        valid_out<= 0; // Clear valid bit
       end
       else begin // Normal operation
         InstrD   <= InstrF;
         PCD      <= PCF;
         PCPlus4D <= PCPlus4F;
+        valid_out<= valid_in; // Propagate valid bit
       end
     end
-    // If enable is 0, registers hold their previous value (stall)
+    // If enable is 0, registers (including valid_out) hold their previous value (stall)
   end
 
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1263,6 +1420,7 @@ module regfile (
   assign rd2 = (a2 != 0) ? rf[a2] : 0; // Hardwire x0 to 0
   
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1300,9 +1458,10 @@ module extend(
       default: immext = 32'bx; // undefined
     endcase       
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
 // Create Date: 22.10.2025 21:22:42
 // Design Name: 
@@ -1316,6 +1475,7 @@ endmodule
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1324,12 +1484,6 @@ endmodule
  * @brief Datapath Pipeline register between Decode and Execution Stage.
  * @details Latches data signals passing from ID to EX.
  * Has asynchronous reset and synchronous clear (flush).
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param clear   Synchronous clear (flush)
- * @param ...D    Inputs from Decode stage
- * @param ...E    Latched outputs for Execute stage
  */
 module ID_IEx  (
   input  logic       clk, reset, clear,
@@ -1338,7 +1492,12 @@ module ID_IEx  (
   input  logic [31:0] ImmExtD, PCPlus4D,
   output logic [31:0] RD1E, RD2E, PCE, 
   output logic [4:0] Rs1E, Rs2E, RdE, 
-  output logic [31:0] ImmExtE, PCPlus4E
+  output logic [31:0] ImmExtE, PCPlus4E,
+  
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from decode
+  output logic       valid_out  // Valid bit for execute
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin
@@ -1351,6 +1510,7 @@ module ID_IEx  (
       RdE      <= 0;
       ImmExtE  <= 0;
       PCPlus4E <= 0;
+      valid_out<= 0; // Clear valid bit
     end
     else if (clear) begin // Synchronous clear (flushes to 0)
       RD1E     <= 0;
@@ -1361,6 +1521,7 @@ module ID_IEx  (
       RdE      <= 0;
       ImmExtE  <= 0;
       PCPlus4E <= 0;
+      valid_out<= 0; // Clear valid bit
     end
     else begin // Normal operation: latch inputs
       RD1E     <= RD1D;
@@ -1371,10 +1532,12 @@ module ID_IEx  (
       RdE      <= RdD;
       ImmExtE  <= ImmExtD;
       PCPlus4E <= PCPlus4D;
+      valid_out<= valid_in; // Propagate valid bit
     end
   end
 
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1411,6 +1574,7 @@ module mux3 #(parameter WIDTH=8)(
   // s=11 -> d2 (based on this logic)
   assign y = s[1] ? d2 : (s[0] ? d1: d0);
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: //spandan_bharadwaj_230102108
@@ -1502,9 +1666,10 @@ module alu(
   assign v    = ~(alucontrol[0] ^ a[31] ^ b[31]) & (a[31] ^ sum[31]) & isAddSub;
 
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
 // Create Date: 22.10.2025 21:23:28
 // Design Name: 
@@ -1518,6 +1683,7 @@ endmodule
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1526,11 +1692,6 @@ endmodule
  * @brief Datapath Pipeline register between Execution and Memory Access Stage.
  * @details Latches data signals passing from EX to MEM.
  * Has an asynchronous reset.
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param ...E    Inputs from Execute stage
- * @param ...M    Latched outputs for Memory stage
  */
 module IEx_IMem(
   input  logic       clk, reset,
@@ -1539,7 +1700,12 @@ module IEx_IMem(
   input  logic [31:0] PCPlus4E,
   output logic [31:0] ALUResultM, WriteDataM,
   output logic [4:0] RdM, 
-  output logic [31:0] PCPlus4M
+  output logic [31:0] PCPlus4M,
+
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from execute
+  output logic       valid_out  // Valid bit for memory
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin 
@@ -1548,19 +1714,22 @@ module IEx_IMem(
       WriteDataM <= 0;
       RdM        <= 0; 
       PCPlus4M   <= 0;
+      valid_out  <= 0; // Clear valid bit
     end
     else begin // Normal operation: latch inputs
       ALUResultM <= ALUResultE;
       WriteDataM <= WriteDataE;
       RdM        <= RdE; 
       PCPlus4M   <= PCPlus4E;      
+      valid_out  <= valid_in; // Propagate valid bit
     end
   end
 
 endmodule
+
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: //spandan_bharadwaj_230102108
 // 
 // Create Date: 22.10.2025 21:24:49
 // Design Name: 
@@ -1574,6 +1743,7 @@ endmodule
 // 
 // Revision:
 // Revision 0.01 - File Created
+// Revision 0.02 - Added valid bit logic
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1582,11 +1752,6 @@ endmodule
  * @brief Datapath Pipeline register between Memory Access and WriteBack Stage.
  * @details Latches data signals passing from MEM to WB.
  * Has an asynchronous reset.
- *
- * @param clk     Clock
- * @param reset   Asynchronous reset
- * @param ...M    Inputs from Memory stage
- * @param ...W    Latched outputs for WriteBack stage
  */
 module IMem_IW (
   input  logic       clk, reset,
@@ -1595,7 +1760,12 @@ module IMem_IW (
   input  logic [31:0] PCPlus4M,
   output logic [31:0] ALUResultW, ReadDataW,
   output logic [4:0] RdW, 
-  output logic [31:0] PCPlus4W
+  output logic [31:0] PCPlus4W,
+
+  // --- MODIFICATION: VALID BIT ---
+  input  logic       valid_in,  // Valid bit from memory
+  output logic       valid_out  // Valid bit for writeback
+  // -------------------------------
 );
 
   always_ff @( posedge clk, posedge reset ) begin 
@@ -1604,106 +1774,15 @@ module IMem_IW (
       ReadDataW  <= 0;
       RdW        <= 0; 
       PCPlus4W   <= 0;
+      valid_out  <= 0; // Clear valid bit
     end
     else begin // Normal operation: latch inputs
       ALUResultW <= ALUResultM;
       ReadDataW  <= ReadDataM;
       RdW        <= RdM; 
       PCPlus4W   <= PCPlus4M;      
+      valid_out  <= valid_in; // Propagate valid bit
     end
   end
 
-endmodule
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: //spandan_bharadwaj_230102108
-// 
-// Create Date: 22.09.2025 07:20:29
-// Design Name: 
-// Module Name: imem
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: Instruction Memory
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Instruction Memory module.
- * @details A simple ROM initialized from an external file ("risctest.mem").
- * Implements combinational read.
- *
- * @param a   32-bit address input (word-aligned).
- * @param rd  32-bit read data (instruction) output.
- */
-module imem (
-  input  logic [31:0] a,  // Address
-  output logic [31:0] rd  // Read data (instruction)
-);
-  // Memory array (64 entries, 32-bits wide)
-  logic [31:0] RAM[63:0];
-
-  // Initialize memory from file
-  initial begin
-    // Load the contents of "risctest.mem" into the RAM array
-    $readmemh("rvx10_pipeline.hex.", RAM);
-  end
-    
-  // Combinational read (uses lower bits of 'a' as word index)
-  assign rd = RAM[a[31:2]]; // word-aligned
-
-endmodule
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: spandan_bharadwaj_230102108
-// 
-// Create Date: 22.09.2025 07:11:54
-// Design Name: 
-// Module Name: dmem
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: Data Memory
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-/**
- * @brief Data Memory module.
- * @details A simple RAM (Random Access Memory).
- * Implements combinational read and synchronous write.
- *
- * @param clk Clock signal.
- * @param we  Write enable signal.
- * @param a   32-bit address input.
- * @param wd  32-bit write data input.
- * @param rd  32-bit read data output.
- */
-module dmem(
-  input  logic       clk, we,
-  input  logic [31:0] a, wd,
-  output logic [31:0] rd
-);
-    
-  // Memory array (64 entries, 32-bits wide)
-  logic [31:0] RAM [63:0];
-    
-  // Combinational read (word-aligned)
-  assign rd = RAM[a[31:2]]; 
-    
-  // Synchronous write (on positive clock edge)
-  always_ff @(posedge clk)
-    if (we) RAM[a[31:2]] <= wd;
-    
 endmodule
