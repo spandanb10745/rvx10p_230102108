@@ -232,6 +232,8 @@ Implementation and testbench display for cycle/instruction counters:
 **CPI visuals:**  
 ![Single-Cycle CPI Result](https://github.com/user-attachments/assets/680e4599-d6ab-41c8-8e22-fcadae0da18d)  
 ![Pipelined CPI Result](https://github.com/user-attachments/assets/a276b24b-e81f-45e1-b142-9f5c0d9f9ffc)
+
+
 **Summary table**
 
 | Core | Cycles | Instructions | CPI |
