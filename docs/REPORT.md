@@ -211,7 +211,7 @@ Multiple instructions in-flight — pipeline snapshots:
 Implementation and testbench display for cycle/instruction counters:
 
 ![Testbench Counter Logic (Declarations)](https://github.com/user-attachments/assets/1ce02f08-7541-4206-9576-5489033ae604)  
-![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/8a60bbba-fd94-4178-9403-17bb6c92e714)  
+![Testbench Counter Logic (Display)](https://github.com/user-attachments/assets/453859bb-a3b7-43f4-a4be-80d4f9cfbaa5) 
 ![riscv module screenshot](https://github.com/user-attachments/assets/478d2116-d0a6-4f9b-b4bf-685a74c207fa)
 ![riscv module screenshot](https://github.com/user-attachments/assets/af6a1f69-6a3c-450c-94b8-ae87cb66896b)
 ![riscv module screenshot](https://github.com/user-attachments/assets/f59699b0-5e69-4e12-ba69-9436605c7028)
@@ -231,14 +231,16 @@ Implementation and testbench display for cycle/instruction counters:
 
 **CPI visuals:**  
 ![Single-Cycle CPI Result](https://github.com/user-attachments/assets/680e4599-d6ab-41c8-8e22-fcadae0da18d)  
-![Pipelined CPI Result](https://github.com/user-attachments/assets/0dbb7ca3-63eb-4b5b-a067-459b9c7b26df)
+![Pipelined CPI Result](https://github.com/user-attachments/assets/a276b24b-e81f-45e1-b142-9f5c0d9f9ffc)
 **Summary table**
 
 | Core | Cycles | Instructions | CPI |
 |---:|---:|---:|---:|
 | Single-Cycle RVX10 | 29 | 29 | 1.00 |
-| Pipelined RVX10-P | 35 | 29 | 1.20 |
-
+| Pipelined RVX10-P | 39 | 31 | 1.256 |
+> 37 cycles as for theory for 31 instructions, the formula is (n-1+k) where k are the stages and n is the total no. of instructions.
+> As for n = 31 , it should come to be total cycles as 35 cycles but for 1 branch and 1 jump success. There will be 4 penalties.
+> 31 instructions as two are not to be executed due to 1 branch success and 1 jump success.
 > Note: pipeline fill/drain and stalls cause CPI > 1; the pipelined design still wins in time because of shorter clock period per stage.
 
 ---
