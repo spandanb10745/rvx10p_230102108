@@ -35,6 +35,10 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 ---
 
+
+## 🧱 Core Block Diagram
+![dsd](https://github.com/user-attachments/assets/0296251d-c06e-440d-a48d-3899437b4aa2)
+
 ## 🔧 Improvements & Future Work
 
 ![Benchmark Placeholder](https://github.com/user-attachments/assets/6952c882-4510-4698-9f61-ace036f2e8b3)
@@ -55,10 +59,6 @@ This enhancement would make the performance analysis more robust, allowing futur
 - Achieve **benchmark-consistent CPI values**
 - **Validate real-world throughput efficiency**
 - Strengthen the design’s credibility through **quantitative comparison** of simulated vs. theoretical results.
-
-
-## 🧱 Core Block Diagram
-![dsd](https://github.com/user-attachments/assets/0296251d-c06e-440d-a48d-3899437b4aa2)
 
 
 ## 🧪 How to Run
