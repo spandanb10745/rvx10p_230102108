@@ -42,6 +42,8 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 During testing, the **RVX10-P** core achieved **39 cycles for 31 instructions**, giving an **average CPI ≈ 1.258**.  
 However, this result is **abstract** — it was not based on a standardized benchmark suite but rather on a self-constructed instruction sequence.
+Now I can also design a testbench which contains 51 instructions containing only 2 branch instructions that are successful. So by theoretical calculations I will get CPI as 59/51= 1.156.
+So, In my testbench as you keep branch and jump instructions constant and increase the testbench by adding instructions other than branch, jump or load, you can potentially even reach nearer to 1 CPI.
 
 ### 💡 Proposed Improvement
 A key next step would be to:
