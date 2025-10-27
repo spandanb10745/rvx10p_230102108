@@ -37,9 +37,8 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 ## 🔧 Improvements & Future Work
 
-![Benchmark Placeholder](https://github.com/user-attachments/assets/your-image-link-here)
+![Benchmark Placeholder](https://github.com/user-attachments/assets/6952c882-4510-4698-9f61-ace036f2e8b3)
 
-> *(Insert benchmark graph or simulation result image above once ready)*
 
 During testing, the **RVX10-P** core achieved **39 cycles for 31 instructions**, giving an **average CPI ≈ 1.258**.  
 However, this result is **abstract** — it was not based on a standardized benchmark suite but rather on a self-constructed instruction sequence.
