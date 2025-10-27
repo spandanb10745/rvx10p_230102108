@@ -35,6 +35,28 @@ Handles **load-use stalls** (1-cycle bubble) and **branch flushes** (via NOP ins
 
 ---
 
+## 🔧 Improvements & Future Work
+
+![Benchmark Placeholder](https://github.com/user-attachments/assets/your-image-link-here)
+
+> *(Insert benchmark graph or simulation result image above once ready)*
+
+During testing, the **RVX10-P** core achieved **39 cycles for 31 instructions**, giving an **average CPI ≈ 1.258**.  
+However, this result is **abstract** — it was not based on a standardized benchmark suite but rather on a self-constructed instruction sequence.
+
+### 💡 Proposed Improvement
+A key next step would be to:
+- **Design a dedicated benchmark-driven testbench**, simulating realistic instruction mixes (arithmetic, logic, load/store, branch, and jump operations).
+- **Compare theoretical and practical CPI values**, refining the pipeline control and forwarding mechanisms to minimize stalls and bubbles.
+- With balanced instruction distribution (keeping one branch and one jump), it’s expected that the **CPI could improve towards ~1.11**, aligning more closely with theoretical performance.
+
+### 🧩 Outcome
+This enhancement would make the performance analysis more robust, allowing future iterations of **RVX10-P** to:
+- Achieve **benchmark-consistent CPI values**
+- **Validate real-world throughput efficiency**
+- Strengthen the design’s credibility through **quantitative comparison** of simulated vs. theoretical results.
+
+
 ## 🧱 Core Block Diagram
 ![dsd](https://github.com/user-attachments/assets/0296251d-c06e-440d-a48d-3899437b4aa2)
 
