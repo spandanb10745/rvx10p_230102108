@@ -49,7 +49,6 @@ So, In my testbench as you keep branch and jump instructions constant and increa
 A key next step would be to:
 - **Design a dedicated benchmark-driven testbench**, simulating realistic instruction mixes (arithmetic, logic, load/store, branch, and jump operations).
 - **Compare theoretical and practical CPI values**, refining the pipeline control and forwarding mechanisms to minimize stalls and bubbles.
-- With balanced instruction distribution (keeping one branch and one jump), it’s expected that the **CPI could improve towards ~1.11**, aligning more closely with theoretical performance.
 
 ### 🧩 Outcome
 This enhancement would make the performance analysis more robust, allowing future iterations of **RVX10-P** to:
