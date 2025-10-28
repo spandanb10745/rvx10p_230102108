@@ -240,7 +240,7 @@ Implementation and testbench display for cycle/instruction counters:
 |---:|---:|---:|---:|
 | Single-Cycle RVX10 | 29 | 29 | 1.00 |
 | Pipelined RVX10-P | 39 | 31 | 1.256 |
-> 37 cycles as for theory for 31 instructions, the formula is (n-1+k) where k are the stages and n is the total no. of instructions.
+> 35 cycles as for theory for 31 instructions, the formula is (n-1+k) where k are the stages and n is the total no. of instructions.
 > As for n = 31 , it should come to be total cycles as 35 cycles but for 1 branch and 1 jump success. There will be 4 penalties.
 > 31 instructions as two are not to be executed due to 1 branch success and 1 jump success.
 > Note: pipeline fill/drain and stalls cause CPI > 1; the pipelined design still wins in time because of shorter clock period per stage.
@@ -251,6 +251,20 @@ Implementation and testbench display for cycle/instruction counters:
 Self-checking testbench prints success when memory[100] == 25:
 
 ![Simulation Succeeded in Console (Example 1)](https://github.com/user-attachments/assets/33db9c56-eb1d-404a-b9c1-7b04d96c3e48)
+
+---
+
+## 📊 Instruction Type Distribution
+
+The benchmark program executed a total of **33 instructions**, categorized as follows:
+
+| **Instruction Type** | **Count** | **Percentage** |
+|----------------------:|:---------:|:---------------:|
+| **R-type**            | 21        | 63.64% |
+| **I-type**            | 5         | 15.15% |
+| **Branch**            | 3         | 9.09% |
+| **Store**             | 2         | 6.06% |
+| **Load**              | 1         | 3.03% |
 
 ---
 
